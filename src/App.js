@@ -1,25 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import { QueryClientProvider } from "@tanstack/react-query";
+import StatsComponent from "./Stats";
+import AddBooksComponent from "./AddBook";
+import BookListComponent from "./Books";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import queryClient from "./Shared/queryClient";
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <div className="flex-row-container">
+        <div className="flex-row-item">
+          <AddBooksComponent />
+        </div>
+        <div className="flex-row-item">
+          <StatsComponent />
+        </div>
+        <div className="flex-row-item">
+          <BookListComponent />
+        </div>
+      </div>
+      <ReactQueryDevtools />
+    </QueryClientProvider>
   );
 }
-
-export default App;
