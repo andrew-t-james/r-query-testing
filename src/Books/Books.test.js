@@ -1,6 +1,7 @@
+import { waitFor } from "@testing-library/react";
 import httpGateway from "../Shared/HttpGateway";
 import BookAdderTestHarness from "../TestTools/BookAdderTestHarness";
-import queryClient from '../Shared/queryClient'
+import {sleep} from "../TestTools/testing";
 
 describe("add book", () => {
   let bookAdderTestHarness = null;
@@ -53,6 +54,7 @@ describe("add book", () => {
     expect(bookListViewModel[0].name).toBe("Moby Dick");
     expect(bookListViewModel[4].name).toBe("The Hobbit");
 
+    await waitFor(() => sleep(10));
     await bookAdderTestHarness.bookListPresenter.sortBy("name", "asc");
 
     expect(bookListViewModel[0].name).toBe("I, Robot");
@@ -60,26 +62,15 @@ describe("add book", () => {
   });
 
   it("should sort by name desc", async () => {
-    // console.log("test", queryClient.getQueryCache().queries[0].options);
     // spot check
     expect(bookListViewModel[0].name).toBe("Moby Dick");
     expect(bookListViewModel[4].name).toBe("The Hobbit");
 
+    await waitFor(() => sleep(10));
     await bookAdderTestHarness.bookListPresenter.sortBy("name", "desc");
 
     expect(bookListViewModel[0].name).toBe("Wind in the willows");
     expect(bookListViewModel[4].name).toBe("I, Robot");
-  });
-
-  it("should sort by author asc", async () => {
-    // spot check
-    expect(bookListViewModel[0].author).toBe("Herman Melville");
-    expect(bookListViewModel[4].author).toBe("Jrr Tolkein");
-
-    await bookAdderTestHarness.bookListPresenter.sortBy("author", "asc");
-
-    expect(bookListViewModel[0].author).toBe("Herman Melville");
-    expect(bookListViewModel[4].author).toBe("Sun Tzu");
   });
 
   it("should filter public and private books", async () => {

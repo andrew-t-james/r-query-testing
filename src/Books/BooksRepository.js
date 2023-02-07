@@ -1,10 +1,6 @@
-import { QueryObserver, QueriesObserver } from "@tanstack/react-query";
+import { QueryObserver, QueriesObserver, MutationObserver } from "@tanstack/react-query";
 import httpGateway from "../Shared/HttpGateway";
 import queryClient from "../Shared/queryClient";
-import { queryClient as testQueryClient } from "../TestTools/BookAdderTestHarness";
-
-// const queryClient =
-//   process.env.NODE_ENV === "test" ? testQueryClient : realQueryClient;
 
 class BooksRepository {
   mode = "books";
@@ -23,9 +19,9 @@ class BooksRepository {
       },
     ]);
 
-    this.lastAddedBookPm = new QueryObserver(queryClient, {
-      queryKey: ["lastAddedBook"],
-      queryFn: this.fetchLastAddedBook,
+    this.lastAddedBookPm = new MutationObserver(queryClient, {
+      mutationKey: ["lastAddedBook"],
+      mutationFn: this.addBook,
     });
   }
 
@@ -52,9 +48,8 @@ class BooksRepository {
       "https://api.logicroom.co/api/jpparkin@gmail.com/books",
       dto
     );
-    queryClient.setQueryData(["lastAddedBook"], programmersModel.name);
 
-    await this.loadApiData();
+    this.loadApiData();
   };
 
   sortBy = async (arg, direction) => {
@@ -78,33 +73,28 @@ class BooksRepository {
   };
 
   getStats = async (callback) => {
-    this.lastAddedBookPm.subscribe((pm) => {
-      let bookName = pm ? pm.data : "";
+    this.booksPm.subscribe(() => {
       let bookCount = 0;
+      let bookName = "";
       const allBooks = queryClient.getQueryData({
         queryKey: ["books", this.mode],
       });
 
       if (allBooks) {
         bookCount = allBooks.result.length;
+        bookName = allBooks.result[allBooks.result.length - 1].name;
       }
 
       callback(bookCount, bookName);
     });
+
+    await this.loadApiData();
   };
 
   fetchBooks = async (mode) => {
     return await httpGateway.get(
       "https://api.logicroom.co/api/jpparkin@gmail.com/" + mode
     );
-  };
-
-  fetchLastAddedBook = () => {
-    const lastBook = queryClient.getQueryData({ queryKey: ["lastAddedBook"] });
-    if (!lastBook) {
-      return "";
-    }
-    return lastBook;
   };
 
   postBook = async (dto) => {
@@ -132,9 +122,11 @@ class BooksRepository {
   };
 
   reset = async () => {
-    await httpGateway.get("https://api.logicroom.co/api/jpparkin@gmail.com/" + "reset")
-    await this.loadApiData()
-  }
+    await httpGateway.get(
+      "https://api.logicroom.co/api/jpparkin@gmail.com/" + "reset"
+    );
+    await this.loadApiData();
+  };
 }
 
 const booksRepository = new BooksRepository();

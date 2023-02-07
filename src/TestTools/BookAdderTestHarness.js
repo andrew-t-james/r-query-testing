@@ -1,4 +1,7 @@
-import { QueryObserver, QueriesObserver, QueryClient } from "@tanstack/react-query";
+import {
+  QueriesObserver,
+  MutationObserver
+} from "@tanstack/react-query";
 import BookListPresenter from "../Books/BooksListPresenter";
 import AddBooksPresenter from "../AddBook/AddBookPresenter";
 import queryClient from "../Shared/queryClient";
@@ -23,15 +26,16 @@ export default class BookAdderTestHarness {
     booksRepository.booksPm = new QueriesObserver(queryClient, [
       {
         queryKey: ["books", "books"],
-        queryFn: () => booksRepository.fetchBooks("books")
+        queryFn: () => booksRepository.fetchBooks("books"),
       },
       {
         queryKey: ["books", "allbooks"],
-        queryFn: () => booksRepository.fetchBooks("allbooks")
-      }
+        queryFn: () => booksRepository.fetchBooks("allbooks"),
+      },
     ]);
 
     this.bookListPresenter.setMode("public");
+
     httpGateway.get = jest.fn().mockImplementation((path) => {
       if (path === "https://api.logicroom.co/api/jpparkin@gmail.com/books") {
         return GetPrivateBooksStub();
@@ -48,19 +52,22 @@ export default class BookAdderTestHarness {
   async addBook() {
     jest.clearAllMocks();
 
-    booksRepository.lastAddedBookPm = new QueryObserver(queryClient, {
-      queryKey: ["lastAddedBook"],
-      queryFn: booksRepository.fetchLastAddedBook
+    booksRepository.lastAddedBookPm = new MutationObserver(queryClient, {
+      mutationKey: ["lastAddedBook"],
+      mutationFn: booksRepository.addBook,
     });
 
-    var pivotedStub = GetPublicBooksStub();
+    const pivotedStub = GetPublicBooksStub();
     pivotedStub.result.push(pivotedStub.result[2]);
+
+
+    httpGateway.post = jest.fn();
 
     httpGateway.get = jest.fn().mockImplementation((path) => {
       return pivotedStub;
     });
 
-    httpGateway.post = jest.fn();
+
     await this.addBooksPresenter.addBook("UFT", "Pete Heard");
   }
 }

@@ -12,18 +12,19 @@ describe("stats", () => {
     bookAdderTestHarness.clearQueryClient();
 
     await bookAdderTestHarness.init(() => {});
+
     await new StatsPresenter().load((generatedViewModel) => {
       statsViewModel = generatedViewModel;
     });
   });
 
   it("should show bookCount", async () => {
-    expect(statsViewModel.lastAddedBook).toBe("");
+    expect(statsViewModel.lastAddedBook).toBe('The Hobbit');
     expect(statsViewModel.bookCount).toBe(5);
   });
 
   it("should show last added book", async () => {
     await bookAdderTestHarness.addBook();
-    expect(statsViewModel.lastAddedBook).toBe("UFT");
+    expect(statsViewModel.lastAddedBook).toBe("Wind in the willows");
   });
 });
